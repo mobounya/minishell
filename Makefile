@@ -1,6 +1,6 @@
 NAME = minishell
 
-objs = main.o
+objs = main.o ft_tokenize.o
 
 flags = -Wall -Werror -Wextra
 
