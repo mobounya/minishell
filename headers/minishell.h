@@ -16,7 +16,8 @@ typedef struct	s_argument
 	char	**tokens;
 	char	**env;
 }			t_argument;
-typedef int t_builtin_function(t_argument	*arguments);
+
+typedef int t_builtin_function();
 
 typedef struct	s_builtin_matcher
 {
@@ -25,3 +26,4 @@ typedef struct	s_builtin_matcher
 }				t_builtin_matcher;
 
 char	**ft_tokenize(char *cmd, char **env);
+char	*ft_search_vr(char **env, char *vr);

@@ -6,7 +6,7 @@
 /*   By: mobounya <mobounya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/30 01:08:11 by mobounya          #+#    #+#             */
-/*   Updated: 2019/12/05 00:13:55 by mobounya         ###   ########.fr       */
+/*   Updated: 2019/12/07 19:49:33 by mobounya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,13 +75,14 @@ char	*ft_search_vr(char **env, char *vr)
 	i = 0;
 	while (env[i])
 	{
-		sign = ft_strrchr(env[i], '=');
+		sign = ft_strchr(env[i], '=');
 		if (sign != NULL)
 		{
 			copy = ft_strdup(env[i]);
 			copy[sign - env[i]] = '\0';
 			if (!ft_strcmp(vr, copy))
 			{
+				// free(vr);
 				ft_memdel((void**)&copy);
 				return (ft_strdup(sign + 1));
 			}
@@ -89,8 +90,41 @@ char	*ft_search_vr(char **env, char *vr)
 		}
 		i++;
 	}
-	free(env);
+	// free(vr);
 	return (NULL);
+}
+
+void	ft_replace(char	**tokens, char **env)
+{
+	uint	i;
+	char	*tmp;
+	char	*path;
+	char	*home;
+
+	i = 1;
+	while (tokens[i])
+	{
+		if (tokens[i][0] == '$')
+		{
+			if (!(tokens[i] = ft_search_vr(env, tokens[i] + 1)))
+				tokens[i] = ft_strnew(1);
+		}
+		else if (tokens[i][0] == '~')
+		{
+			if (ft_strlen(tokens[i]) > 1 && tokens[i][1] != '/')
+				continue;
+			if ((home = ft_search_vr(env, ft_strdup("HOME"))))
+			{
+				tmp = ft_strdup(tokens[i] + 1);
+				path = ft_strjoin(home, tmp);
+				free(tmp);
+				free(home);
+				free(tokens[i]);
+				tokens[i] = path;
+			}
+		}
+		i++;
+	}
 }
 
 char	**ft_tokenize(char *cmd, char **env)
@@ -99,8 +133,6 @@ char	**ft_tokenize(char *cmd, char **env)
 	int		args;
 	uint	i;
 	uint	j;
-	char	*tmp;
-	char	*path;
 
 	i = 0;
 	j = 0;
@@ -114,7 +146,7 @@ char	**ft_tokenize(char *cmd, char **env)
 	tokens[args] = NULL;
 	while (cmd[i])
 	{
-		while (cmd[i] && (cmd[i] == ' ' || cmd[i] == '\t'))
+		while (cmd[i] && (cmd[i] == ' ' || cmd[i]  == '\t'))
 			i++;
 		if (cmd[i] == '"')
 		{
@@ -128,26 +160,7 @@ char	**ft_tokenize(char *cmd, char **env)
 			j++;
 		}
 	}
+	ft_replace(tokens, env);
 	free(cmd);
-	i = 1;
-	while (tokens[i])
-	{
-		if (tokens[i][0] == '$')
-		{
-			if (!(tokens[i] = ft_search_vr(env, tokens[i] + 1)))
-				tokens[i] = ft_strnew(1);
-		}
-		else if (tokens[i][0] == '~')
-		{
-			if (ft_strlen(tokens[i]) > 1 && tokens[i][1] != '/')
-				continue;
-			tmp = ft_strdup(tokens[i] + 1);
-			path = ft_strjoin(env[2] + 5, tmp);
-			free(tmp);
-			free(tokens[i]);
-			tokens[i] = path;
-		}
-		i++;
-	}
 	return (tokens);
 }

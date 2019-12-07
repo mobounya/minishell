@@ -6,7 +6,7 @@
 /*   By: mobounya <mobounya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/28 22:50:44 by mobounya          #+#    #+#             */
-/*   Updated: 2019/12/05 00:49:06 by mobounya         ###   ########.fr       */
+/*   Updated: 2019/12/07 20:13:42 by mobounya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,12 +76,17 @@ int		ft_echo(t_argument	*arguments)
 int		ft_changedir(t_argument	*arguments)
 {
 	uint	i;
+	char	*home;
 
 	i = 0;
 	while (arguments->tokens[i]) 
 		i++;
 	if (i == 1)
-		chdir(environ[3] + 5);
+	{
+		home = ft_search_vr(arguments->env, ft_strdup("HOME"));
+		chdir(home);
+		free(home);
+	}
 	else if (i > 2)
 		ft_putendl("cd: too many arguments");
 	else
@@ -89,27 +94,70 @@ int		ft_changedir(t_argument	*arguments)
 	return (1);
 }
 
-int		ft_setenv(char *var, char ***env)
+int		ft_replace_env(t_argument *arguments)
 {
-	char	**new;
-	uint	i;
+	uint	j;
+	char	**token;
+	char	**variable;
+
+
+	j = 0;
+	if (ft_strchr(arguments->tokens[1], '='))
+	{
+		token = ft_strsplit(arguments->tokens[1], '=');
+		while (arguments->env[j])
+		{
+			variable = ft_strsplit(arguments->env[j], '=');
+			if (ft_strcmp(variable[0], token[0]) == 0)
+			{
+				ft_free_double(variable);
+				arguments->env[j] = ft_strdup(arguments->tokens[1]);
+				ft_free_double(token);
+				return (0);
+			}
+			ft_free_double(variable);
+			j++;
+		}
+		ft_free_double(token);
+	}
+	return (1);
+}
+
+int		ft_setenv(t_argument *arguments)
+{
+	uint	size;
 	char	**tmp;
 
-	tmp = *env;
-	i = 0;
-	while (tmp[i])
-		i++;
-	i = i + 1;
-	new = malloc(sizeof(char *) * (i + 1));
-	new[i] = NULL;
-	i = 0;
-	while(tmp[i])
+	size = 0;
+	while (arguments->tokens[size])
+		size++;
+	if (size == 1)
 	{
-		new[i] = ft_strdup(tmp[i]);
-		i++;
+		ft_putendl("Usage: setenv VARIABLE=VALUE");
+		return (1);
 	}
-	new[i] = ft_strdup(var);
-	*env = new;
+	else if (size > 2)
+	{
+		ft_putendl("setenv: too many arguments");
+		return (1);
+	}
+	else if (ft_replace_env(arguments))
+	{
+		size = 0;
+		while (arguments->env[size])
+			size++;
+		tmp = malloc(sizeof(char *) * (size + 2));
+		tmp[size + 1] = NULL;
+		size = 0;
+		while (arguments->env[size])
+		{
+			tmp[size] = ft_strdup(arguments->env[size]);
+			size++;
+		}
+		tmp[size] = ft_strdup(arguments->tokens[1]);
+		ft_free_double(arguments->env);
+		arguments->env = tmp;
+	}
 	return (0);
 }
 
@@ -142,6 +190,42 @@ void	ft_init_env(t_argument	*arguments)
 	arguments->env = res;
 }
 
+int		ft_unsetenv(t_argument	*arguments)
+{
+	uint	i;
+	uint	j;
+	char	*tmp;
+	char	*sign;
+	char	**new;
+
+	i = 0;
+	j = 0;
+	while (arguments->env[i])
+		i++;
+	if (arguments->env[1] == NULL)
+	{
+		ft_putendl("Usage: unsetenv $VAR");
+		return (1);
+	}
+	new = malloc(sizeof(char *) * i + 1);
+	i = 0;
+	while (arguments->env[i])
+	{
+		tmp = ft_strdup(arguments->env[i]);
+		sign = ft_strchr(tmp, '=');
+		tmp[sign - tmp] = '\0';
+		if (ft_strcmp(tmp, arguments->tokens[1]))
+		{
+			new[j] = ft_strdup(arguments->env[i]);
+			j++;
+		}
+		i++;
+	}
+	new[j] = NULL;
+	ft_free_double(arguments->env);
+	arguments->env = new;
+	return (1);
+}
 
 int		is_builtin(t_argument	*arguments)
 {
@@ -153,8 +237,8 @@ int		is_builtin(t_argument	*arguments)
 		{.name="exit", .function = &ft_exit},
 		{.name="echo", .function = &ft_echo},
 		{.name="cd", .function= &ft_changedir},
-		{.name="setenv", .function=NULL},
-		{.name="unsetenv", .function=NULL},
+		{.name="setenv", .function=&ft_setenv},
+		{.name="unsetenv", .function=&ft_unsetenv},
 		{.name="env", .function=&ft_env},
 	};
 	while (i < 6)
@@ -172,9 +256,9 @@ int		is_builtin(t_argument	*arguments)
 
 int		main(void)
 {
-	char	buffer[ARG_MAX + 1];
-	int		re;
-	int		pid;
+	char		buffer[ARG_MAX + 1];
+	int			re;
+	int			pid;
 	t_argument	*arguments;
 
 	arguments = ft_memalloc(sizeof(t_argument));
@@ -197,7 +281,7 @@ int		main(void)
 				{
 					pid = fork();
 					if (pid == 0)
-						execve("/bin/echo", arguments->tokens, arguments->env);
+						execve("/bin/pwd", arguments->tokens, arguments->env);
 					else
 						wait(NULL);
 				}
