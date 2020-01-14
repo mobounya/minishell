@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   libft.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mobounya <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mobounya <mobounya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/04/04 23:17:03 by mobounya          #+#    #+#             */
-/*   Updated: 2019/04/12 22:49:42 by mobounya         ###   ########.fr       */
+/*   Updated: 2020/01/14 21:04:20 by mobounya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,4 +89,10 @@ int				ft_tolower(int c);
 int				ft_toupper(int c);
 size_t			ft_strlen(const char *s);
 void			ft_lstdelone(t_list **alst, void (*del)(void *, size_t));
+char			**ft_arpush(char **ar, char *data);
+unsigned int	ft_count_arr(void **ar);
+void			ft_free_double(void **ptr);
+void			ft_strlower(char *str);
+char			*ft_strreplace(char *str, const char *needle, const char *sub);
+char			*ft_strndup(char *str, unsigned int n);
 #endif

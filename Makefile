@@ -1,6 +1,6 @@
 NAME = minishell
 
-objs = main.o ft_tokenize.o
+objs = main.o ft_tokenize.o ft_tokenize_helpers.o ft_builtins.o ft_env_funcs.o ft_errors.o ft_memory.o ft_split_arguments.o
 
 flags = -Wall -Werror -Wextra
 

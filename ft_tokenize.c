@@ -6,160 +6,93 @@
 /*   By: mobounya <mobounya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/30 01:08:11 by mobounya          #+#    #+#             */
-/*   Updated: 2019/12/07 19:49:33 by mobounya         ###   ########.fr       */
+/*   Updated: 2020/01/14 23:22:45 by mobounya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/minishell.h"
 
-static int		ft_count_args(char *cmd)
+void			ft_replace_home(char **str, char **env)
 {
-	uint	args;
-	uint	i;
-	t_BOOL	quote;
-	t_BOOL	word;
-
-	quote = FALSE;
-	i = 0;
-	args = 0;
-	word = FALSE;
-
-	while (cmd[i])
-	{
-		if (cmd[i] == '"')
-		{
-			if (quote == TRUE)
-			{
-				args++;
-				quote = FALSE;
-			}
-			else
-				quote = TRUE;
-		}
-		else if (!quote && (cmd[i] == ' ' || cmd[i] == '\t'))
-		{
-			(word && args++);
-			word = FALSE;
-		}
-		else if (!quote)
-			word = TRUE;
-		i++;
-	}
-	if (quote)
-		return (-1);
-	(word && args++);
-	return (args);
-}
-
-char	*ft_dup_till(char *cmd, char c, uint *j)
-{
-	uint	i;
-	char	*command;
-
-	i = 0;
-	while (cmd[i] && cmd[i] != c)
-		i++;
-	cmd[i] = '\0';
-	*j = i + *j;
-	command = ft_strdup(cmd);
-	free(cmd);
-	return (command);
-}
-
-char	*ft_search_vr(char **env, char *vr)
-{
-	char	*sign;
-	uint	i;
-	char	*copy;
-
-	i = 0;
-	while (env[i])
-	{
-		sign = ft_strchr(env[i], '=');
-		if (sign != NULL)
-		{
-			copy = ft_strdup(env[i]);
-			copy[sign - env[i]] = '\0';
-			if (!ft_strcmp(vr, copy))
-			{
-				// free(vr);
-				ft_memdel((void**)&copy);
-				return (ft_strdup(sign + 1));
-			}
-			ft_memdel((void**)&copy);
-		}
-		i++;
-	}
-	// free(vr);
-	return (NULL);
-}
-
-void	ft_replace(char	**tokens, char **env)
-{
-	uint	i;
-	char	*tmp;
-	char	*path;
 	char	*home;
+	char	*after;
+	char	*temp;
 
-	i = 1;
-	while (tokens[i])
+	home = ft_search_vr(env, "HOME");
+	if (home == NULL)
+		home = ft_strdup("~");
+	if (*str + 1)
 	{
-		if (tokens[i][0] == '$')
-		{
-			if (!(tokens[i] = ft_search_vr(env, tokens[i] + 1)))
-				tokens[i] = ft_strnew(1);
-		}
-		else if (tokens[i][0] == '~')
-		{
-			if (ft_strlen(tokens[i]) > 1 && tokens[i][1] != '/')
-				continue;
-			if ((home = ft_search_vr(env, ft_strdup("HOME"))))
-			{
-				tmp = ft_strdup(tokens[i] + 1);
-				path = ft_strjoin(home, tmp);
-				free(tmp);
-				free(home);
-				free(tokens[i]);
-				tokens[i] = path;
-			}
-		}
-		i++;
+		after = ft_strdup(*str + 1);
+		temp = home;
+		home = ft_strjoin(home, after);
+		free(temp);
+	}
+	*str = home;
+}
+
+char			*ft_replace_env_var(const char *argument, char **env)
+{
+	char	*dollar;
+	char	*var_name;
+	char	*var_value;
+	char	*res;
+	uint	i;
+
+	res = ft_strnew(0);
+	while (*argument)
+	{
+		i = 0;
+		if ((dollar = ft_strchr(argument, '$')) == NULL)
+			break ;
+		dollar++;
+		while (dollar[i] && ft_isalnum(dollar[i]))
+			i++;
+		var_name = ft_strsub(dollar, 0, i);
+		if ((var_value = ft_search_vr(env, var_name)) == NULL)
+			var_value = ft_strnew(0);
+		ft_strdel(&var_name);
+		res = joinfree(res, ft_strsub(argument, 0, dollar - argument - 1), 3);
+		res = joinfree(res, var_value, 3);
+		argument = dollar + i;
+	}
+	res = joinfree(res, argument, 1);
+	return (res);
+}
+
+void			ft_replace(char **tokens, char **env)
+{
+	char	*temp;
+
+
+	while (*tokens)
+	{
+		if ((*tokens[0] == '~' && ft_strlen(*tokens) < 2) || (*tokens[0] == '~' && *tokens[1] == '/'))
+			ft_replace_home(&(*tokens), env);
+		temp = *tokens;
+		*tokens = ft_replace_env_var(*tokens, env);
+		free(temp);
+		tokens++;
 	}
 }
 
-char	**ft_tokenize(char *cmd, char **env)
+char			**ft_tokenize(char *cmd, char **env)
 {
 	char	**tokens;
-	int		args;
-	uint	i;
-	uint	j;
+	int		arg_count;
 
-	i = 0;
-	j = 0;
-	args = ft_count_args(cmd);
-	if (args == -1)
+	arg_count = ft_count_args(cmd);
+	if (arg_count == -1)
 	{
 		ft_putendl("Syntax Error");
+		free(cmd);
 		return (NULL);
 	}
-	tokens = malloc(sizeof(char *) * (args + 1));
-	tokens[args] = NULL;
-	while (cmd[i])
-	{
-		while (cmd[i] && (cmd[i] == ' ' || cmd[i]  == '\t'))
-			i++;
-		if (cmd[i] == '"')
-		{
-			tokens[j] = ft_dup_till(ft_strdup(cmd + i + 1), '"', &i);
-			i = i + 2;
-			j++;
-		}
-		else if (cmd[i])
-		{
-			tokens[j] = ft_dup_till(ft_strdup(cmd + i), ' ', &i);
-			j++;
-		}
-	}
+	if ((tokens = malloc(sizeof(char *) * (arg_count + 1))) == NULL)
+		return (NULL);
+	tokens[arg_count] = NULL;
+	ft_split_args(tokens, cmd);
+	ft_strlower(tokens[0]);
 	ft_replace(tokens, env);
 	free(cmd);
 	return (tokens);

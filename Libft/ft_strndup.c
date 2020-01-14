@@ -1,18 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strnew.c                                        :+:      :+:    :+:   */
+/*   ft_strndup.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mobounya <mobounya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/04/04 06:46:14 by mobounya          #+#    #+#             */
-/*   Updated: 2020/01/11 23:07:41 by mobounya         ###   ########.fr       */
+/*   Created: 2020/01/14 21:03:38 by mobounya          #+#    #+#             */
+/*   Updated: 2020/01/14 21:04:27 by mobounya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-char	*ft_strnew(size_t size)
+char			*ft_strndup(char *str, unsigned int n)
 {
-	return ((char*)ft_memalloc(sizeof(char) * (size + 1)));
+	unsigned int	i;
+	char			*res;
+
+	if ((res = malloc(sizeof(char) * n + 1)) == NULL)
+		return (NULL);
+	i = 0;
+	while (str[i] && i < n)
+	{
+		res[i] = str[i];
+		i++;
+	}
+	res[i] = '\0';
+	return (res);
 }

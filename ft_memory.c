@@ -1,18 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strnew.c                                        :+:      :+:    :+:   */
+/*   ft_memory.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mobounya <mobounya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/04/04 06:46:14 by mobounya          #+#    #+#             */
-/*   Updated: 2020/01/11 23:07:41 by mobounya         ###   ########.fr       */
+/*   Created: 2020/01/14 21:25:13 by mobounya          #+#    #+#             */
+/*   Updated: 2020/01/14 21:25:44 by mobounya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "headers/minishell.h"
 
-char	*ft_strnew(size_t size)
+void		ft_free_double(void **ptr)
 {
-	return ((char*)ft_memalloc(sizeof(char) * (size + 1)));
+	uint i;
+
+	i = 0;
+	if (ptr == NULL)
+		return ;
+	while (ptr[i])
+	{
+		ft_memdel((void **)&ptr[i]);
+		i++;
+	}
+	ft_memdel((void **)&ptr);
 }

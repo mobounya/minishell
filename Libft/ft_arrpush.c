@@ -1,18 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strnew.c                                        :+:      :+:    :+:   */
+/*   ft_arrpush.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mobounya <mobounya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/04/04 06:46:14 by mobounya          #+#    #+#             */
-/*   Updated: 2020/01/11 23:07:41 by mobounya         ###   ########.fr       */
+/*   Created: 2020/01/06 02:50:56 by mobounya          #+#    #+#             */
+/*   Updated: 2020/01/06 02:52:06 by mobounya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-char	*ft_strnew(size_t size)
+char	**ft_arpush(char **ar, char *data)
 {
-	return ((char*)ft_memalloc(sizeof(char) * (size + 1)));
+	char			**new_ar;
+	size_t			size;
+	unsigned int	i;
+
+	i = 0;
+	size = ft_count_arr((void **)ar) + 1;
+	if ((new_ar = malloc(sizeof(char *) * (size + 1))) == NULL)
+		return (NULL);
+	while (i < size - 1)
+	{
+		new_ar[i] = ft_strdup(ar[i]);
+		i++;
+	}
+	new_ar[i] = data;
+	new_ar[i + 1] = NULL;
+	return (new_ar);
 }
