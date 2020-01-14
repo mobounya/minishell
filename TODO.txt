@@ -1,0 +1,4 @@
+Implement absolute and relative path execution
+    examples:
+        - ./exec
+        - /exec
