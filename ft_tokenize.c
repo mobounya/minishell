@@ -6,7 +6,7 @@
 /*   By: mobounya <mobounya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/30 01:08:11 by mobounya          #+#    #+#             */
-/*   Updated: 2020/01/14 23:22:45 by mobounya         ###   ########.fr       */
+/*   Updated: 2020/01/14 23:53:23 by mobounya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,10 +64,10 @@ void			ft_replace(char **tokens, char **env)
 {
 	char	*temp;
 
-
 	while (*tokens)
 	{
-		if ((*tokens[0] == '~' && ft_strlen(*tokens) < 2) || (*tokens[0] == '~' && *tokens[1] == '/'))
+		if ((*tokens[0] == '~' && ft_strlen(*tokens) < 2) || \
+			(*tokens[0] == '~' && *tokens[1] == '/'))
 			ft_replace_home(&(*tokens), env);
 		temp = *tokens;
 		*tokens = ft_replace_env_var(*tokens, env);
