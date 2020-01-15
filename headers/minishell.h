@@ -6,7 +6,7 @@
 /*   By: mobounya <mobounya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/14 21:35:53 by mobounya          #+#    #+#             */
-/*   Updated: 2020/01/14 21:36:15 by mobounya         ###   ########.fr       */
+/*   Updated: 2020/01/15 18:21:04 by mobounya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,10 +54,12 @@ int						ft_replace_env(t_argument *arguments);
 t_argument				*ft_init_env(void);
 int						ft_env(t_argument *arguments);
 void					ft_not_found(char *command);
-void					ft_errors(char *prefix);
+void					ft_errors(char *prefix, int line);
 void					ft_free_double(void **ptr);
 void					ft_split_args(char **tokens, const char *command);
-
+int						ft_bin_execute(t_argument *arguments);
+int						ft_run_binary(char *path, char **args, char **env);
+void					ft_file_not_found(char *command);
 /*
 ** builtins
 */

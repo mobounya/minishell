@@ -6,13 +6,13 @@
 /*   By: mobounya <mobounya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/01/14 21:23:04 by mobounya          #+#    #+#             */
-/*   Updated: 2020/01/14 21:24:30 by mobounya         ###   ########.fr       */
+/*   Updated: 2020/01/15 18:21:28 by mobounya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "headers/minishell.h"
 
-void		ft_errors(char *prefix)
+void		ft_errors(char *prefix, int line)
 {
 	static char *errors[] = {
 		"Undefined error: 0",
@@ -35,12 +35,20 @@ void		ft_errors(char *prefix)
 		ft_putstr(prefix);
 		ft_putstr(": ");
 	}
-	ft_putendl(errors[g_errno]);
+	ft_putstr(errors[g_errno]);
+	if (line)
+		ft_putchar('\n');
 }
 
 void		ft_not_found(char *command)
 {
 	ft_putstr("minishell: ");
 	ft_putstr("Command Not Found: ");
+	ft_putendl(command);
+}
+
+void		ft_file_not_found(char *command)
+{
+	ft_putstr("minishell: no such file or directory: ");
 	ft_putendl(command);
 }

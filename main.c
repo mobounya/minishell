@@ -6,7 +6,7 @@
 /*   By: mobounya <mobounya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/28 22:50:44 by mobounya          #+#    #+#             */
-/*   Updated: 2020/01/14 23:05:58 by mobounya         ###   ########.fr       */
+/*   Updated: 2020/01/15 19:37:20 by mobounya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,64 +33,17 @@ int			is_builtin(t_argument *arguments)
 		if (!ft_strcmp(g_builtin_tab[i].name, arguments->tokens[0]))
 		{
 			if (g_builtin_tab[i].function(arguments))
-				ft_errors(g_builtin_tab[i].name);
+				ft_errors(g_builtin_tab[i].name, 1);
 			return (0);
 		}
 		i++;
 	}
-	return (1);
-}
-
-int			ft_run_binary(char *path, char **args, char **env)
-{
-	int pid;
-
-	if (!access(path, F_OK) && !access(path, X_OK))
-	{
-		pid = fork();
-		if (pid == 0)
-		{
-			if (execve(path, args, env) == -1)
-				exit(1);
-		}
-		else
-			wait(NULL);
-		return (0);
-	}
-	return (1);
-}
-
-int			ft_bin_execute(t_argument *arguments)
-{
-	char *var_path;
-	char **path;
-	char *bin;
-	uint i;
-
-	i = 0;
-	var_path = ft_search_vr(arguments->env, "PATH");
-	path = ft_strsplit(var_path, ':');
-	ft_memdel((void **)&var_path);
-	while (path[i])
-	{
-		var_path = ft_strjoin(path[i], "/");
-		bin = ft_strjoin(var_path, arguments->tokens[0]);
-		ft_memdel((void **)&var_path);
-		if (ft_run_binary(bin, arguments->tokens, arguments->env) == 0)
-		{
-			ft_memdel((void **)&bin);
-			ft_free_double((void **)path);
-			return (0);
-		}
-		ft_memdel((void **)&bin);
-		i++;
-	}
-	ft_free_double((void **)path);
 	return (1);
 }
 
 int			ft_exec(const char *buffer, t_argument *arguments)
 {
+	g_errno = 0;
 	arguments->tokens = ft_tokenize(ft_strdup(buffer), arguments->env);
 	if (arguments->tokens == NULL || arguments->tokens[0] == NULL)
 	{
@@ -98,8 +51,21 @@ int			ft_exec(const char *buffer, t_argument *arguments)
 		return (1);
 	}
 	if (is_builtin(arguments))
-		if (ft_bin_execute(arguments))
-			ft_not_found(arguments->tokens[0]);
+	{
+		if ((g_errno = ft_bin_execute(arguments)))
+		{
+			if (g_errno == 1)
+				ft_not_found(arguments->tokens[0]);
+			else if (g_errno == 2)
+				ft_file_not_found(arguments->tokens[0]);
+			else
+			{
+				ft_errors("minishell", 0);
+				ft_putstr(": ");
+				ft_putendl(arguments->tokens[0]);
+			}
+		}
+	}
 	ft_free_double((void **)arguments->tokens);
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: mobounya <mobounya@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/30 01:08:11 by mobounya          #+#    #+#             */
-/*   Updated: 2020/01/14 23:53:23 by mobounya         ###   ########.fr       */
+/*   Updated: 2020/01/15 20:36:59 by mobounya         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,14 @@ void			ft_replace_home(char **str, char **env)
 	home = ft_search_vr(env, "HOME");
 	if (home == NULL)
 		home = ft_strdup("~");
-	if (*str + 1)
+	if ((*str)[1])
 	{
 		after = ft_strdup(*str + 1);
 		temp = home;
 		home = ft_strjoin(home, after);
 		free(temp);
 	}
+	free(*str);
 	*str = home;
 }
 
@@ -66,9 +67,9 @@ void			ft_replace(char **tokens, char **env)
 
 	while (*tokens)
 	{
-		if ((*tokens[0] == '~' && ft_strlen(*tokens) < 2) || \
-			(*tokens[0] == '~' && *tokens[1] == '/'))
-			ft_replace_home(&(*tokens), env);
+		if (((*tokens)[0] == '~' && (*tokens)[1] == '\0') || \
+		((*tokens)[0] == '~' && (*tokens)[1] == '/'))
+			ft_replace_home(tokens, env);
 		temp = *tokens;
 		*tokens = ft_replace_env_var(*tokens, env);
 		free(temp);
